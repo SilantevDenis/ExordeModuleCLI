@@ -37,5 +37,5 @@ jobs:
             linux/amd64
             linux/arm64
           tags: |
-            exordelabs/exorde-cli:${{ steps.vars.outputs.sha_short }}
-            exordelabs/exorde-cli:latest
+            SilantevDenis/ExordeModuleCLI:${{ steps.vars.outputs.sha_short }}
+            SilantevDenis/ExordeModuleCLI
