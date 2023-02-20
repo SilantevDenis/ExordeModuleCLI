@@ -3,6 +3,10 @@ version: "3.9"
 services:
   exorde:
     build: .
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
     volumes:
       - ./Transaction.py:/Transaction.py
       - ./Scraper.py:/Scraper.py
