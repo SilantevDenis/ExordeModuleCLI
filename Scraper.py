@@ -171,10 +171,6 @@ class Scraper():
         if (os.path.exists('ExordeWD\\lang.json') == False):
             goingOn = False
         self.listlang = self.lang_table
-
-    ############################################################################################################################
-    ############################################################################################################################
-    ############################################################################################################################
         
     def manage_scraping(self):
         sender = threading.Thread(target=self.manage_sending)
@@ -238,16 +234,27 @@ class Scraper():
                             # a.daemon = True
                             # a.start()
                             # self.threads.append(a)
-                            
+                                            
+                    dataCollectParameters_dict = requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/targets/dataCollectParameters.json", timeout=10).json()
+                    # wait_min = int(dataCollectParameters_dict["inter_collect_delay_min"])
+                    # wait_max = int(dataCollectParameters_dict["inter_collect_delay_max"])
+                    wait_min = 90
+                    wait_max = 180
+
+
+                    if detailed_validation_printing_enabled:
+                        print("inter_collect_delay_min = ",wait_min)
+                        print("inter_collect_delay_max = ",wait_max)
+
                     if(len(self.keywords) > 0):                        
                         time.sleep(0.5)
-                        random_wait_ = random.randint(3, 10)*60
+                        random_wait_ = random.randint(wait_min, wait_max)
                         if scrape_printing_enabled:
                             print("[{}]\t{}".format(dt.now(),"SLEEP BEFORE NEW DATA COLLECT: "),random_wait_," s")
                         time.sleep(random_wait_)
                     else:                        
                         time.sleep(0.5)
-                        random_wait_ = random.randint(3, 10)*60
+                        random_wait_ = random.randint(wait_min, wait_max)
                         if scrape_printing_enabled:
                             print("[{}]\t{}".format(dt.now(),"SLEEP BEFORE NEW DATA COLLECT: "),random_wait_," s")
                         time.sleep(random_wait_)
@@ -1024,7 +1031,7 @@ class Scraper():
         
     def manage_sending(self):
 
-        _contract = self.app.cm.instantiateContract("ConfigRegistry")        
+        # _contract = self.app.cm.instantiateContract("ConfigRegistry")        
 
         while True:
             try:                    

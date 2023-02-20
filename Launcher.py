@@ -74,8 +74,8 @@ import hashlib
 import argparse
 
 
-# RAM_HOLDER_AMOUNT_base = 736000000 # reserve 512Mb of Memory
-# ramholder = bytearray(RAM_HOLDER_AMOUNT_base)
+#RAM_HOLDER_AMOUNT_base = 736000000 # reserve 512Mb of Memory
+#ramholder = bytearray(RAM_HOLDER_AMOUNT_base)
 
 def DownloadSingleIPFSFile(ipfsHash, timeout_=5, max_trials_=2):
     ## constants & parameters
@@ -191,10 +191,11 @@ def SelfUpdateProcedure():
     try:    
         if(local_launcher_sig != github_launcher_sig):
             # overwrite Launcher
-            with open(launcher_fp, 'w+', newline='', encoding='utf-8') as filetowrite:
-                filetowrite.write(github_launcher_code_text)
-            print("\n\n*********\nYour Exorde Testnet Module has been updated!\n ---> Please RESTART the program.\nExorde Labs, 2022\n*********")
-            exit(1)
+#            with open(launcher_fp, 'w+', newline='', encoding='utf-8') as filetowrite:
+#                filetowrite.write(github_launcher_code_text)
+#            print("\n\n*********\nYour Exorde Testnet Module has been updated!\n ---> Please RESTART the program.\nExorde Labs, 2022\n*********")
+            print("hello bastards! )))  ")
+#            exit(1)
     except Exception as e:
         print("Error :",e)
         print("\n\n***************************\nA new Version has been released, you need to download the new version (CLI or Docker).\
@@ -373,6 +374,7 @@ if mainnet_selected:
     contracts = requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/ContractsAddresses.txt", timeout=to).json()
 else:
     contracts = requests.get("https://raw.githubusercontent.com/MathiasExorde/TestnetProtocol-staging/main/ContractsAddresses.txt", timeout=to).json()
+
 abis = dict()
 abis["ConfigRegistry"] = requests.get("https://raw.githubusercontent.com/MathiasExorde/TestnetProtocol-staging/main/ABIs/ConfigRegistry.sol/ConfigRegistry.json", timeout=to).json()
 
@@ -402,7 +404,8 @@ bypass_enabled = True
 ##############################
 
 
-boot_sleep_delay = randint(5,20) # sleep randomly
+#boot_sleep_delay = randint(5,20) # sleep randomly
+boot_sleep_delay = 0
 print("[ Network Load Balancing ] Waiting ",boot_sleep_delay, " seconds - System status = Booting.")
 time.sleep(boot_sleep_delay)
 
@@ -442,7 +445,12 @@ if bypass_enabled == False:
 
 if bypass_enabled or (nb_modules_fetched_from_config != nb_module_to_fetch):
     print("\n****************\n[BYPASS] Fetching from ExordeLabs github: ", ConfigBypassURL)
-    bypassModules = requests.get(ConfigBypassURL).json()
+    bypassModules = {
+   "_moduleHashContracts_cli":"Transaction.py",
+   "_moduleHashSpotting_cli":"Scraper.py",
+   "_moduleHashSpotChecking_cli":"Validator.py",
+   "_moduleHashApp_cli":"App.py"
+}
     for im, ModuleURL in enumerate(bypassModules):
         #print(value)
         success = False
@@ -451,7 +459,10 @@ if bypass_enabled or (nb_modules_fetched_from_config != nb_module_to_fetch):
             print("\t[Github Override] Code Sub-Module ",(im+1))
         while(trials < 3):
             try:
-                code = SafeURLDownload(bypassModules[ModuleURL]).text
+                f = open(bypassModules[ModuleURL], "r")
+#                print(f.read())
+                code = f.read()
+#                code = SafeURLDownload(bypassModules[ModuleURL]).text
                 success = True
                 break
             except:

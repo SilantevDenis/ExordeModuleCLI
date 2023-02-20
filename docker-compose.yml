@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  exorde:
+    build: .
+    volumes:
+      - ./Transaction.py:/Transaction.py
+      - ./Scraper.py:/Scraper.py
+      - ./Validator.py:/Validator.py
+      - ./App.py:/App.py
+      - ./Launcher.py:/Launcher.py
+    command: python -u Launcher.py -m 0x82a0a0589d7d68D23a76A74Df7891d4b7FA86180 -l 4

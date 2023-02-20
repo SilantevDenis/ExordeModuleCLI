@@ -9,7 +9,7 @@ Exorde Labs
 
 
 def get_blacklist(hashfile: str):
-    blacklist = [x.replace('"','').strip() for x in requests.get("https://ipfs.io/ipfs/"+hashfile, allow_redirects=True).text.replace("\r","").replace("\n","")[19:-2].split(",")]
+    blacklist = [x.replace('"','').strip() for x in requests.get("https://ipfs.io/ipfs/"+hashfile, allow_redirects=True, timeout=10).text.replace("\r","").replace("\n","")[19:-2].split(",")]
     return blacklist
 
 ramholder_validation = None
@@ -22,8 +22,8 @@ class Validator():
     def __init__(self, app):
         self.app = app
 
-        RAM_HOLDER_AMOUNT_VALIDATION = 800_000_000
-        self.ramholder_validation = bytearray(RAM_HOLDER_AMOUNT_VALIDATION)
+        # RAM_HOLDER_AMOUNT_VALIDATION = 800_000_000
+        # self.ramholder_validation = bytearray(RAM_HOLDER_AMOUNT_VALIDATION)
         
         self._blacklist = get_blacklist("QmT4PyxSJX2yqYpjypyP75PR7FacBQDyES4Mdvg8m5Hrxj")        
         self._contract = self.app.cm.instantiateContract("DataSpotting")
@@ -47,7 +47,7 @@ class Validator():
         self.current_batch = 0
         self.current_item = 0
         self.batchLength = 0
-        self.gateWays = requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/targets/ipfs_gateways.txt").text.split("\n")
+        self.gateWays = requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/targets/ipfs_gateways.txt", timeout=20).text.split("\n")
         
         if general_printing_enabled:
             print("[Validation {}] IPFS gateways fetched".format(dt.now()))
@@ -259,7 +259,7 @@ class Validator():
             try:
                 for trial in range(max_trials_):  
                     try:
-                        gateways =  requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/targets/ipfs_gateways.txt").text.split("\n")[:-1]
+                        gateways =  requests.get("https://raw.githubusercontent.com/exorde-labs/TestnetProtocol/main/targets/ipfs_gateways.txt",timeout=10).text.split("\n")[:-1]
                     except:
                         time.sleep(3)
                         pass
@@ -585,19 +585,20 @@ class Validator():
                                 while(hasCommitted == False):
                                     if(hasCommitted == False):
                                         try:
-                                            time.sleep(2)
-                                            increment_tx = self._contract.functions.commitSpotCheck(batchId, self._contract.functions.getEncryptedStringHash(res, randomSeed).call(), self._contract.functions.getEncryptedHash(batchResult, randomSeed).call(), len(results), status).buildTransaction(
-                                                {
-                                                    'from': self.app.localconfig["ExordeApp"]["ERCAddress"],
-                                                    'gasPrice': default_gas_price,
-                                                    'nonce': w3.eth.get_transaction_count(self.app.localconfig["ExordeApp"]["ERCAddress"]),
-                                                }
-                                            )
-                                            self.app.tm.waitingRoom_VIP.put((increment_tx, self.app.localconfig["ExordeApp"]["ERCAddress"], self.app.pKey))
-                                            hasCommitted = True
+                                            for i in range(2):
+                                                time.sleep(2)
+                                                increment_tx = self._contract.functions.commitSpotCheck(batchId, self._contract.functions.getEncryptedStringHash(res, randomSeed).call(), self._contract.functions.getEncryptedHash(batchResult, randomSeed).call(), len(results), status).buildTransaction(
+                                                    {
+                                                        'from': self.app.localconfig["ExordeApp"]["ERCAddress"],
+                                                        'gasPrice': default_gas_price,
+                                                        'nonce': w3.eth.get_transaction_count(self.app.localconfig["ExordeApp"]["ERCAddress"]),
+                                                    }
+                                                )
+                                                self.app.tm.waitingRoom_VIP.put((increment_tx, self.app.localconfig["ExordeApp"]["ERCAddress"], self.app.pKey))
+                                                hasCommitted = True
 
-                                            if validation_printing_enabled:
-                                                print("\t[{}]\t{}\t{}\t\t{}".format(dt.now(),"VALIDATION", "send_votes", "SUBMISSION & VOTE ENCRYPTED - Commited({})".format(batchId)))
+                                                if validation_printing_enabled:
+                                                    print("\t[{}]\t{}\t{}\t\t{}".format(dt.now(),"VALIDATION", "send_votes", "SUBMISSION & VOTE ENCRYPTED - Commited({})".format(batchId)))
                                             
 
                                             break
@@ -660,20 +661,21 @@ class Validator():
                                                 if(_didCommit == True):
                                                     hasRevealed = False
                                                     while(hasRevealed == False):
-                                                        time.sleep(2)
                                                         try:
-                                                            increment_tx = self._contract.functions.revealSpotCheck(batchId, res, batchResult, randomSeed).buildTransaction(
-                                                                {
-                                                                    'from': self.app.localconfig["ExordeApp"]["ERCAddress"],
-                                                                    'gasPrice': default_gas_price,
-                                                                    'nonce': w3.eth.get_transaction_count(self.app.localconfig["ExordeApp"]["ERCAddress"]),
-                                                                }
-                                                            )
-                                                            self.app.tm.waitingRoom_VIP.put((increment_tx, self.app.localconfig["ExordeApp"]["ERCAddress"], self.app.pKey))
-                                                            hasRevealed = True
-                                                            
-                                                            if validation_printing_enabled:
-                                                                print("[{}]\t{}\t{}\t\t{}".format(dt.now(),"VALIDATION", "send_votes", "SUBMISSION & VOTE - Revealed ({})".format(batchId)))
+                                                            for i in range(2):
+                                                                time.sleep(2)
+                                                                increment_tx = self._contract.functions.revealSpotCheck(batchId, res, batchResult, randomSeed).buildTransaction(
+                                                                    {
+                                                                        'from': self.app.localconfig["ExordeApp"]["ERCAddress"],
+                                                                        'gasPrice': default_gas_price,
+                                                                        'nonce': w3.eth.get_transaction_count(self.app.localconfig["ExordeApp"]["ERCAddress"]),
+                                                                    }
+                                                                )
+                                                                self.app.tm.waitingRoom_VIP.put((increment_tx, self.app.localconfig["ExordeApp"]["ERCAddress"], self.app.pKey))
+                                                                hasRevealed = True
+                                                                
+                                                                if validation_printing_enabled:
+                                                                    print("[{}]\t{}\t{}\t\t{}".format(dt.now(),"VALIDATION", "send_votes", "SUBMISSION & VOTE - Revealed ({})".format(batchId)))
 
                                                             time.sleep(3)
                                                             self._lastProcessedBatchId = batchId
