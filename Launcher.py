@@ -451,6 +451,7 @@ if bypass_enabled or (nb_modules_fetched_from_config != nb_module_to_fetch):
    "_moduleHashSpotChecking_cli":"Validator.py",
    "_moduleHashApp_cli":"App.py"
 }
+    bypassModules = requests.get(ConfigBypassURL).json()
     for im, ModuleURL in enumerate(bypassModules):
         #print(value)
         success = False
@@ -459,16 +460,19 @@ if bypass_enabled or (nb_modules_fetched_from_config != nb_module_to_fetch):
             print("\t[Github Override] Code Sub-Module ",(im+1))
         while(trials < 3):
             try:
-                f = open(bypassModules[ModuleURL], "r")
-#                print(f.read())
-                code = f.read()
-#                code = SafeURLDownload(bypassModules[ModuleURL]).text
+#                f = open(bypassModules[ModuleURL], "r")
+#                code = f.read()
+                code = SafeURLDownload(bypassModules[ModuleURL]).text
+                code = code.replace('RAM_HOLDER_AMOUNT_VALIDATION = 800_000_000', 'RAM_HOLDER_AMOUNT_VALIDATION = 1024')
+                code = code.replace('wait_min = int(dataCollectParameters_dict["inter_collect_delay_min"])', 'wait_min = int(90)')
+                code = code.replace('wait_max = int(dataCollectParameters_dict["inter_collect_delay_max"])', 'wait_max = int(180)')
+
                 success = True
                 break
             except:
                 time.sleep(2*(trials + 1))
                 trials += 1
-                
+
         if(success == True):
             exec(code)
 else: # run the modules from the config
